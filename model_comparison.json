@@ -1,0 +1,16 @@
+{
+  "winner": "Random Forest",
+  "n_total": 1521,
+  "n_train": 1216,
+  "n_test": 305,
+  "results": {
+    "Linear Regression": {
+      "mae": 34.099,
+      "r2": 0.5481
+    },
+    "Random Forest": {
+      "mae": 31.742,
+      "r2": 0.5625
+    }
+  }
+}

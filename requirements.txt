@@ -1,0 +1,6 @@
+# Python packages this project needs.
+# Install them all at once with:  pip install -r requirements.txt
+flask
+pandas
+scikit-learn
+joblib

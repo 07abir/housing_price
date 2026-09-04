@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kolkata House Price Estimator</title>
+
+  <!-- Nice web font (falls back to system fonts if you're offline). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Our styles live in static/style.css. url_for finds it correctly. -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="page">
+
+    <!-- ===== Header ===== -->
+    <header class="hero">
+      <span class="pill">🏠 House-Price(Kolkata)</span>
+      <h1>House Price Estimator</h1>
+      <p>Enter a home's details and get an instant price estimate,
+         learned from {{ "{:,}".format(n_total) }} real Kolkata listings.</p>
+    </header>
+
+    <div class="grid">
+
+      <!-- ===== Left: the input form ===== -->
+      <section class="card form-card">
+        <h2>Describe the home</h2>
+        <!-- method="post" sends the values to app.py, which predicts. -->
+        <form method="post">
+
+          <label for="location">Location</label>
+          <select id="location" name="location" required>
+            {% for loc in locations %}
+              <option value="{{ loc }}"
+                {% if request.form.get('location') == loc %}selected{% endif %}>
+                {{ loc }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <label for="area_type">Area type</label>
+          <select id="area_type" name="area_type" required>
+            {% for a in area_types %}
+              <option value="{{ a }}"
+                {% if request.form.get('area_type') == a %}selected{% endif %}>
+                {{ a }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <div class="two-col">
+            <div>
+              <label for="total_sqft">Total area (sq.ft)</label>
+              <input type="number" id="total_sqft" name="total_sqft"
+                     min="100" step="1" placeholder="e.g. 1200" required
+                     value="{{ request.form.get('total_sqft', '') }}" />
+            </div>
+            <div>
+              <label for="bhk">Bedrooms (BHK)</label>
+              <input type="number" id="bhk" name="bhk"
+                     min="1" max="20" step="1" placeholder="e.g. 3" required
+                     value="{{ request.form.get('bhk', '') }}" />
+            </div>
+          </div>
+
+          <button type="submit">Estimate price →</button>
+        </form>
+      </section>
+
+      <!-- ===== Right: the result + how good the model is ===== -->
+      <section class="card result-card">
+        {% if prediction %}
+          <p class="result-label">Estimated price</p>
+          <p class="result-price">{{ prediction }}</p>
+          <p class="result-note">Predicted by the {{ winner }} model.</p>
+        {% else %}
+          <div class="result-empty">
+            <p class="result-price muted">₹ — —</p>
+            <p class="result-note">Fill in the form and press
+               <strong>Estimate price</strong> to see a prediction here.</p>
+          </div>
+        {% endif %}
+
+        <!-- How good is the model? (the numbers you asked for) -->
+        <div class="metrics">
+          <h3>How good is this model?</h3>
+          <div class="metric-row">
+            <div class="metric">
+              <span class="metric-value">±{{ mae_pretty }}</span>
+              <span class="metric-name">Average error (MAE)</span>
+              <span class="metric-help">Typical gap between the guess and
+                the real price. Lower is better.</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">{{ r2_percent }}%</span>
+              <span class="metric-name">Variation explained (R²)</span>
+              <span class="metric-help">How much of the price differences the
+                model can account for. Higher is better.</span>
+            </div>
+          </div>
+          <p class="split-note">
+            Trained on <strong>{{ "{:,}".format(n_train) }}</strong> homes,
+            tested on <strong>{{ "{:,}".format(n_test) }}</strong> unseen homes
+            (an 80/20 split).
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ===== The model comparison you built ===== -->
+    <section class="card compare-card">
+      <h3>Which model won? 🏆</h3>
+      <p class="compare-intro">Both models were trained on the same data and
+         graded on the same 20% test set. The winner powers this site.</p>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Avg error (MAE)</th>
+            <th>R² (explained)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for name, s in all_scores.items() %}
+            <tr class="{% if name == winner %}winner-row{% endif %}">
+              <td>{{ name }}{% if name == winner %} <span class="tag">winner</span>{% endif %}</td>
+              <td>±₹{{ '%.2f'|format(s.mae) }} L</td>
+              <td>{{ '%.1f'|format(s.r2 * 100) }}%</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="foot">
+      Built with Python · Flask · scikit-learn · A learning project.
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# ============================================================
+# .gitignore — tells Git which files to NEVER upload to GitHub.
+# ============================================================
+
+# ---- Python virtual environment (the big "env" folder) ----
+# This is machine-specific and huge (thousands of files).
+# Anyone who clones the repo makes their own with:
+#   python -m venv .venv  &&  pip install -r requirements.txt
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Python cache / compiled files (auto-generated) ----
+__pycache__/
+*.pyc
+*.pyo
+
+# ---- Secrets / environment variables (best practice) ----
+# If you ever add a .env file with passwords or API keys,
+# this keeps it off GitHub.
+.env
+*.env
+
+# ---- Operating-system / editor junk ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Optional: uncomment the next line if you'd rather NOT
+# upload the 9.5 MB trained model and regenerate it instead
+# (with `python train_model.py`). ----
+# *.pkl
